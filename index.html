@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1200, initial-scale=1.0" />
+    <title>Минималистичный список задач</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Сегодня в фокусе</p>
+          <h1>Задачи без шума</h1>
+        </div>
+        <section class="summary glass" aria-label="Прогресс">
+          <div>
+            <span>В работе</span>
+            <strong id="activeCount">0</strong>
+          </div>
+          <div>
+            <span>Срочно</span>
+            <strong id="urgentCount">0</strong>
+          </div>
+          <div>
+            <span>Архив</span>
+            <strong id="doneCount">0</strong>
+          </div>
+        </section>
+      </header>
+
+      <section class="composer glass" aria-label="Добавить задачу">
+        <form id="taskForm">
+          <div class="smart-line">
+            <label class="smart-input" aria-label="Название задачи">
+              <span class="field-icon">+</span>
+              <input id="titleInput" type="text" placeholder="Новая задача..." autocomplete="off" required />
+            </label>
+            <button id="submitButton" class="primary-button" type="submit">Добавить</button>
+          </div>
+
+          <details id="taskDetails" class="smart-details">
+            <summary>
+              <span>Параметры задачи</span>
+              <small>цель, срок, делегирование</small>
+            </summary>
+
+            <div class="detail-grid">
+              <label class="field">
+                <span class="field-label"><b>◎</b> Цель</span>
+                <select id="goalInput"></select>
+              </label>
+
+              <label class="field">
+                <span class="field-label"><b>◐</b> Время</span>
+                <select id="timeInput">
+                  <option value="morning">Утро</option>
+                  <option value="day">День</option>
+                  <option value="evening">Вечер</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field-label"><b>◇</b> Подкатегория</span>
+                <select id="categoryInput"></select>
+              </label>
+
+              <label class="field">
+                <span class="field-label"><b>⌁</b> День</span>
+                <select id="scheduleInput">
+                  <option value="monday">Понедельник</option>
+                  <option value="tuesday">Вторник</option>
+                  <option value="wednesday">Среда</option>
+                  <option value="thursday">Четверг</option>
+                  <option value="friday">Пятница</option>
+                  <option value="saturday">Суббота</option>
+                  <option value="sunday">Воскресенье</option>
+                  <option value="later">Позже</option>
+                </select>
+              </label>
+
+              <label id="laterDateField" class="field later-date-field" hidden>
+                <span class="field-label"><b>№</b> Дата</span>
+                <input id="laterDateInput" type="date" />
+              </label>
+
+              <label class="field">
+                <span class="field-label"><b>!</b> Важность</span>
+                <select id="importanceInput">
+                  <option value="high">Высокая</option>
+                  <option value="medium" selected>Средняя</option>
+                  <option value="low">Низкая</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field-label"><b>↗</b> Срочность</span>
+                <select id="urgencyInput">
+                  <option value="urgent">Срочно</option>
+                  <option value="normal" selected>Обычно</option>
+                  <option value="later">Можно позже</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field-label"><b>@</b> Делегировать</span>
+                <input id="delegateInput" type="text" placeholder="Кому поручить" />
+              </label>
+
+              <div class="field wide">
+                <span class="field-label"><b>≡</b> Подзадачи</span>
+                <div id="subtaskFields" class="subtask-fields" aria-label="Подзадачи"></div>
+                <button id="addSubtaskButton" class="soft-button add-subtask-button" type="button">+ Подзадача</button>
+              </div>
+            </div>
+
+            <div id="editActions" class="edit-actions" hidden>
+              <button id="cancelEditButton" class="soft-button" type="button">Отменить редактирование</button>
+            </div>
+          </details>
+        </form>
+      </section>
+
+      <section class="toolbar glass" aria-label="Фильтры">
+        <div class="filter-group">
+          <span>Время</span>
+          <div class="chips" id="timeFilters"></div>
+        </div>
+        <div class="filter-group">
+          <span>Подкатегория</span>
+          <select id="categoryFilter"></select>
+        </div>
+        <label class="select-pill">
+          <span>Цель</span>
+          <select id="goalFilter">
+            <option value="all">Все цели</option>
+          </select>
+        </label>
+        <label class="select-pill">
+          <span>Статус</span>
+          <select id="statusFilter">
+            <option value="all">Все</option>
+            <option value="active">Активные</option>
+            <option value="done">Выполненные</option>
+            <option value="delegated">Делегированные</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="week-planner glass" aria-label="Планировщик на неделю">
+        <div class="week-days" id="weekDays"></div>
+        <div class="week-layout">
+          <article class="selected-day">
+            <div>
+              <p class="eyebrow">На выбранный день</p>
+              <h2 id="selectedDayTitle">Понедельник</h2>
+            </div>
+            <span id="selectedDayMeta" class="day-meta">0 задач</span>
+            <div id="selectedDayTasks" class="day-task-list"></div>
+          </article>
+
+          <aside class="week-overview" aria-label="Ближайшая неделя">
+            <p class="eyebrow">Ближайшая неделя</p>
+            <h2>Запланировано</h2>
+            <div id="weekOverview" class="week-overview-list"></div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="goalBoard" class="goal-board" aria-label="Списки задач по целям"></section>
+
+      <details class="drawer glass">
+        <summary>
+          <span>Цели и подкатегории</span>
+          <small>добавить или переименовать</small>
+        </summary>
+
+        <div class="manager">
+          <article class="manager-panel">
+            <h2>Цели</h2>
+            <form id="goalForm" class="quick-form">
+              <input id="newGoalInput" type="text" placeholder="Новая цель" required />
+              <button type="submit">Добавить</button>
+            </form>
+            <div id="goalManager" class="editable-list"></div>
+          </article>
+
+          <article class="manager-panel">
+            <h2>Подкатегории</h2>
+            <form id="categoryForm" class="quick-form">
+              <select id="categoryGoalInput" aria-label="Цель для подкатегории"></select>
+              <input id="newCategoryInput" type="text" placeholder="Новая подкатегория" required />
+              <button type="submit">Добавить</button>
+            </form>
+            <div id="categoryManager" class="editable-list"></div>
+          </article>
+        </div>
+      </details>
+
+      <details class="drawer glass">
+        <summary>
+          <span>Архив</span>
+          <small>выполненные задачи</small>
+        </summary>
+        <div class="archive-actions">
+          <button id="clearArchiveButton" class="soft-button" type="button">Очистить архив</button>
+        </div>
+        <div id="archiveBoard" class="archive-board"></div>
+      </details>
+    </main>
+
+    <template id="taskTemplate">
+      <article class="task-card">
+        <div class="task-main">
+          <label class="task-check">
+            <input type="checkbox" />
+            <span aria-hidden="true"></span>
+          </label>
+          <div class="task-content">
+            <div class="task-line">
+              <h3></h3>
+              <div class="task-actions">
+                <button class="edit-button" type="button" aria-label="Редактировать задачу">✎</button>
+                <button class="archive-button" type="button" aria-label="Перенести в архив">↧</button>
+                <button class="delete-button" type="button" aria-label="Удалить задачу">×</button>
+              </div>
+            </div>
+            <div class="meta-row"></div>
+            <div class="subtask-list"></div>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
